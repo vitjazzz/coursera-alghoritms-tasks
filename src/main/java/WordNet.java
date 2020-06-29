@@ -2,7 +2,12 @@ import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.DirectedCycle;
 import edu.princeton.cs.algs4.In;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -12,6 +17,8 @@ public class WordNet {
     private final List<String> wordNetSynsets = new ArrayList<>();
     private Digraph synsetsDigraph;
     private int root;
+
+    private SAP sap;
 
 
     public WordNet(String synsets, String hypernyms) {
@@ -31,6 +38,8 @@ public class WordNet {
             throw new IllegalArgumentException("Digraph should be with root.");
         }
         this.root = zeroOutDegreeVertexes.get(0);
+
+        this.sap = new SAP(synsetsDigraph);
     }
 
     private void fillSynsets(String synsets) {
@@ -109,7 +118,6 @@ public class WordNet {
         return nounIndexes.containsKey(word);
     }
 
-    // distance between nounA and nounB (defined below)
     public int distance(String nounA, String nounB){
         if (nounA == null || nounB == null){
             throw new IllegalArgumentException();
@@ -117,10 +125,12 @@ public class WordNet {
         if (!isNoun(nounA) || !isNoun(nounB)){
             throw new IllegalArgumentException();
         }
+        if (nounA.equals(nounB)) return 0;
+        return sap.length(nounIndexes.get(nounA), nounIndexes.get(nounB));
     }
 
     // a synset (second field of synsets.txt) that is the common ancestor of nounA and nounB
-    // in a shortest ancestral path (defined below)
+    // in a shortest ancestral path
     public String sap(String nounA, String nounB) {
         if (nounA == null || nounB == null){
             throw new IllegalArgumentException();
@@ -128,6 +138,10 @@ public class WordNet {
         if (!isNoun(nounA) || !isNoun(nounB)){
             throw new IllegalArgumentException();
         }
+        if (nounA.equals(nounB)) return nounA;
+
+        int ancestorIndex = sap.ancestor(nounIndexes.get(nounA), nounIndexes.get(nounB));
+        return wordNetSynsets.get(ancestorIndex);
     }
 
     public static void main(String[] args) {
