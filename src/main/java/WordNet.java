@@ -1,13 +1,17 @@
 import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.DirectedCycle;
 import edu.princeton.cs.algs4.In;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class WordNet {
 
     private final Map<String, Set<Integer>> nounIndexes = new HashMap<>();
     private final List<String> wordNetSynsets = new ArrayList<>();
     private Digraph synsetsDigraph;
+    private int root;
 
 
     public WordNet(String synsets, String hypernyms) {
@@ -16,6 +20,17 @@ public class WordNet {
         }
         fillSynsets(synsets);
         fillHypernyms(hypernyms);
+        if (new DirectedCycle(synsetsDigraph).hasCycle()) {
+            throw new IllegalArgumentException("No cicles allowed.");
+        }
+        List<Integer> zeroOutDegreeVertexes = IntStream.range(0, wordNetSynsets.size())
+                .filter(index -> synsetsDigraph.outdegree(index) == 0)
+                .boxed()
+                .collect(Collectors.toList());
+        if (zeroOutDegreeVertexes.size() != 1) {
+            throw new IllegalArgumentException("Digraph should be with root.");
+        }
+        this.root = zeroOutDegreeVertexes.get(0);
     }
 
     private void fillSynsets(String synsets) {
