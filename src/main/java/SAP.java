@@ -20,7 +20,7 @@ public class SAP {
 
     // length of shortest ancestral path between v and w; -1 if no such path
     public int length(int v, int w) {
-        if (isOutOfRange(v) || isOutOfRange(w)){
+        if (isOutOfRange(v) || isOutOfRange(w)) {
             throw new IllegalArgumentException();
         }
         return length(Collections.singleton(v), Collections.singleton(w));
@@ -28,7 +28,7 @@ public class SAP {
 
     // a common ancestor of v and w that participates in a shortest ancestral path; -1 if no such path
     public int ancestor(int v, int w) {
-        if (isOutOfRange(v) || isOutOfRange(w)){
+        if (isOutOfRange(v) || isOutOfRange(w)) {
             throw new IllegalArgumentException();
         }
         return ancestor(Collections.singleton(v), Collections.singleton(w));
@@ -36,7 +36,7 @@ public class SAP {
 
     // length of shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
     public int length(Iterable<Integer> v, Iterable<Integer> w) {
-        if (v == null || w == null){
+        if (v == null || w == null) {
             throw new IllegalArgumentException();
         }
         return bfs(v, w).length;
@@ -44,15 +44,13 @@ public class SAP {
 
     // a common ancestor that participates in shortest ancestral path; -1 if no such path
     public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
-        if (v == null || w == null){
+        if (v == null || w == null) {
             throw new IllegalArgumentException();
         }
         return bfs(v, w).ancestor;
     }
 
-
-
-    private Result bfs(Iterable<Integer> v, Iterable<Integer> w){
+    private AncestralPath bfs(Iterable<Integer> v, Iterable<Integer> w) {
         infos = new Info[digraph.V()];
         processingQueue.clear();
         for (Integer vVertex : v) {
@@ -60,17 +58,19 @@ public class SAP {
         }
         for (Integer wVertex : w) {
             boolean containsSameV = addSource(wVertex, SOURCE.W);
-            if (containsSameV) return new Result(0, wVertex);
+            if (containsSameV) return new AncestralPath(0, wVertex);
         }
+        AncestralPath shortestPath = new AncestralPath(Integer.MAX_VALUE, -1);
         while (!processingQueue.isEmpty()) {
             Integer currentVertex = processingQueue.poll();
             Info currentInfo = infos[currentVertex];
+            if (currentInfo.distance + 1 >= shortestPath.length) {
+                continue;
+            }
             for (Integer vertex : digraph.adj(currentVertex)) {
                 Info vertexInfo = infos[vertex];
                 if (vertexInfo != null) {
-                    if (vertexInfo.source != currentInfo.source) {
-                        return new Result(vertexInfo.distance + currentInfo.distance + 1, vertex);
-                    }
+                    shortestPath = calculateShortestPath(shortestPath, currentInfo, vertex, vertexInfo);
                 } else {
                     infos[vertex] = new Info(
                             currentInfo.distance + 1,
@@ -81,11 +81,24 @@ public class SAP {
                 }
             }
         }
-        return new Result(-1, -1);
+        return new AncestralPath(shortestPath.length != Integer.MAX_VALUE ?
+                shortestPath.length : -1,
+                shortestPath.ancestor
+        );
+    }
+
+    private AncestralPath calculateShortestPath(AncestralPath shortestPath, Info currentInfo, Integer vertex, Info vertexInfo) {
+        if (vertexInfo.source != currentInfo.source) {
+            int pathLength = vertexInfo.distance + currentInfo.distance + 1;
+            if (pathLength < shortestPath.length) {
+                shortestPath = new AncestralPath(pathLength, vertex);
+            }
+        }
+        return shortestPath;
     }
 
     private boolean addSource(Integer sourceVertex, SOURCE source) {
-        if (sourceVertex == null || isOutOfRange(sourceVertex)){
+        if (sourceVertex == null || isOutOfRange(sourceVertex)) {
             throw new IllegalArgumentException();
         }
         if (infos[sourceVertex] != null) {
@@ -109,25 +122,13 @@ public class SAP {
             this.fromVertex = fromVertex;
             this.source = source;
         }
-
-        public int getDistance() {
-            return distance;
-        }
-
-        public int getFromVertex() {
-            return fromVertex;
-        }
-
-        public SOURCE getSource() {
-            return source;
-        }
     }
 
-    private static class Result {
+    private static class AncestralPath {
         private final int length;
         private final int ancestor;
 
-        public Result(int length, int ancestor) {
+        public AncestralPath(int length, int ancestor) {
             this.length = length;
             this.ancestor = ancestor;
         }
@@ -137,7 +138,7 @@ public class SAP {
         V, W;
     }
 
-    private boolean isOutOfRange(int i){
+    private boolean isOutOfRange(int i) {
         return i < 0 || i >= digraph.V();
     }
 
@@ -148,7 +149,7 @@ public class SAP {
         while (!StdIn.isEmpty()) {
             int v = StdIn.readInt();
             int w = StdIn.readInt();
-            int length   = sap.length(v, w);
+            int length = sap.length(v, w);
             int ancestor = sap.ancestor(v, w);
             StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
         }
