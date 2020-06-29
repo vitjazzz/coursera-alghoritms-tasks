@@ -22,7 +22,7 @@ public class WordNet {
 
 
     public WordNet(String synsets, String hypernyms) {
-        if (synsets == null || hypernyms == null){
+        if (synsets == null || hypernyms == null) {
             throw new IllegalArgumentException();
         }
         fillSynsets(synsets);
@@ -71,6 +71,7 @@ public class WordNet {
                 String hypernymsLine = in.readLine();
                 int index = extractIndex(hypernymsLine);
                 String hypernym = extractHypernym(hypernymsLine);
+                if (hypernym.isEmpty()) continue;
                 for (String relationshipIndexStr : parseHypernyms(hypernym)) {
                     synsetsDigraph.addEdge(index, Integer.parseInt(relationshipIndexStr));
                 }
@@ -80,28 +81,31 @@ public class WordNet {
         }
     }
 
-    private Integer extractIndex(String synsetStr){
+    private Integer extractIndex(String synsetStr) {
         int firstComa = synsetStr.indexOf(",");
-        String indexStr = synsetStr.substring(0, firstComa);
+        String indexStr = firstComa != -1 ?
+                synsetStr.substring(0, firstComa)
+                : synsetStr;
         return Integer.parseInt(indexStr);
     }
 
-    private String extractSynset(String synsetStr){
+    private String extractSynset(String synsetStr) {
         int firstComa = synsetStr.indexOf(",");
-        int secondComa = synsetStr.indexOf(",", firstComa);
-        return synsetStr.substring(firstComa+1, secondComa);
+        int secondComa = synsetStr.indexOf(",", firstComa + 1);
+        return synsetStr.substring(firstComa + 1, secondComa);
     }
 
-    private String extractHypernym(String hypernymsStr){
+    private String extractHypernym(String hypernymsStr) {
         int firstComa = hypernymsStr.indexOf(",");
-        return hypernymsStr.substring(firstComa+1);
+        return firstComa != -1 ?
+                hypernymsStr.substring(firstComa + 1) : "";
     }
 
-    private String[] parseSynsets(String synset){
+    private String[] parseSynsets(String synset) {
         return synset.split(" ");
     }
 
-    private String[] parseHypernyms(String hypernym){
+    private String[] parseHypernyms(String hypernym) {
         return hypernym.split(",");
     }
 
@@ -112,17 +116,17 @@ public class WordNet {
 
     // is the word a WordNet noun?
     public boolean isNoun(String word) {
-        if (word == null){
+        if (word == null) {
             throw new IllegalArgumentException();
         }
         return nounIndexes.containsKey(word);
     }
 
-    public int distance(String nounA, String nounB){
-        if (nounA == null || nounB == null){
+    public int distance(String nounA, String nounB) {
+        if (nounA == null || nounB == null) {
             throw new IllegalArgumentException();
         }
-        if (!isNoun(nounA) || !isNoun(nounB)){
+        if (!isNoun(nounA) || !isNoun(nounB)) {
             throw new IllegalArgumentException();
         }
         if (nounA.equals(nounB)) return 0;
@@ -132,10 +136,10 @@ public class WordNet {
     // a synset (second field of synsets.txt) that is the common ancestor of nounA and nounB
     // in a shortest ancestral path
     public String sap(String nounA, String nounB) {
-        if (nounA == null || nounB == null){
+        if (nounA == null || nounB == null) {
             throw new IllegalArgumentException();
         }
-        if (!isNoun(nounA) || !isNoun(nounB)){
+        if (!isNoun(nounA) || !isNoun(nounB)) {
             throw new IllegalArgumentException();
         }
         if (nounA.equals(nounB)) return nounA;
