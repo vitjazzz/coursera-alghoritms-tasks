@@ -1,23 +1,25 @@
+package board;
+
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdOut;
 
 public class Solver {
-    public Solver(Board initial){
-        if (initial == null){
+    public Solver(Board initial) {
+        if (initial == null) {
             throw new IllegalArgumentException("Cannot be null.");
         }
     }
 
-    public boolean isSolvable(){
-
+    public boolean isSolvable() {
+        return false;
     }
 
-    public int moves(){
-
+    public int moves() {
+        return 0;
     }
 
-    public Iterable<Board> solution(){
-
+    public Iterable<Board> solution() {
+        return null;
     }
 
     public static void main(String[] args) {
