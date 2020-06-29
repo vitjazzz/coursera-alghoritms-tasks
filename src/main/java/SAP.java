@@ -51,6 +51,7 @@ public class SAP {
     }
 
     private AncestralPath bfs(Iterable<Integer> v, Iterable<Integer> w) {
+        // TODO keep 2 types of info array (for v and w)
         infos = new Info[digraph.V()];
         processingQueue.clear();
         for (Integer vVertex : v) {
@@ -71,13 +72,11 @@ public class SAP {
                 Info vertexInfo = infos[vertex];
                 if (vertexInfo != null) {
                     shortestPath = calculateShortestPath(shortestPath, currentInfo, vertex, vertexInfo);
+                    if (vertexInfo.source != currentInfo.source){
+                        addVertexToQueue(currentVertex, vertex);
+                    }
                 } else {
-                    infos[vertex] = new Info(
-                            currentInfo.distance + 1,
-                            currentVertex,
-                            currentInfo.source
-                    );
-                    processingQueue.add(vertex);
+                    addVertexToQueue(currentVertex, vertex);
                 }
             }
         }
@@ -85,6 +84,16 @@ public class SAP {
                 shortestPath.length : -1,
                 shortestPath.ancestor
         );
+    }
+
+    private void addVertexToQueue(Integer currentVertex, Integer nextVertex) {
+        Info currentInfo = infos[currentVertex];
+        infos[nextVertex] = new Info(
+                currentInfo.distance + 1,
+                currentVertex,
+                currentInfo.source
+        );
+        processingQueue.add(nextVertex);
     }
 
     private AncestralPath calculateShortestPath(AncestralPath shortestPath, Info currentInfo, Integer vertex, Info vertexInfo) {
