@@ -3,8 +3,6 @@ package board;
 import java.util.Iterator;
 
 public class Board {
-    private Board prev;
-
     private final int n;
     private final int[][] tiles;
     private final int manhattan;
@@ -81,32 +79,40 @@ public class Board {
     }
 
     public Iterable<Board> neighbors() {
-        return new Iterable<Board>() {
-            public Iterator<Board> iterator() {
-                return new BoardNeighborsIterator();
-            }
-        };
+        return BoardNeighborsIterator::new;
     }
 
     private class BoardNeighborsIterator implements Iterator<Board> {
         private int neighborsCount;
         private int currentIndex = 0;
+        private final Board[] neighbors = new Board[4];
 
         private BoardNeighborsIterator() {
-            Board[] neighbors = new Board[4];
             TileIndex emptyTile = findEmptyTile();
             if (emptyTile.row > 0) {
-                // add left
+                neighbors[neighborsCount++] = twin(emptyTile.row - 1, emptyTile.col, emptyTile.row, emptyTile.col);
             }
             if (emptyTile.row < n - 1) {
-                // add right
+                neighbors[neighborsCount++] = twin(emptyTile.row + 1, emptyTile.col, emptyTile.row, emptyTile.col);
             }
             if (emptyTile.col > 0) {
-                // add top
+                neighbors[neighborsCount++] = twin(emptyTile.row, emptyTile.col - 1, emptyTile.row, emptyTile.col);
             }
             if (emptyTile.col < n - 1) {
-                // add bottom
+                neighbors[neighborsCount++] = twin(emptyTile.row, emptyTile.col + 1, emptyTile.row, emptyTile.col);
             }
+        }
+
+        public boolean hasNext() {
+            return currentIndex < neighborsCount;
+        }
+
+        public Board next() {
+            return neighbors[currentIndex++];
+        }
+
+        public void remove() {
+            throw new IllegalStateException("not implemented");
         }
 
         private TileIndex findEmptyTile(){
@@ -118,19 +124,6 @@ public class Board {
                 }
             }
             throw new RuntimeException("Should not be here.");
-        }
-
-
-        public boolean hasNext() {
-            return false;
-        }
-
-        public Board next() {
-            return null;
-        }
-
-        public void remove() {
-            throw new IllegalStateException("not implemented");
         }
 
         private class TileIndex {
@@ -175,13 +168,6 @@ public class Board {
         tiles[yRow][yCol] = temp;
     }
 
-    public static void main(String[] args) {
-        int[][] tests = new int[3][4];
-        Board board = new Board(tests);
-        System.out.println(board);
-    }
-
-
     private int calculateHamming() {
         int hamming = 0;
         for (int i = 1; i < n * n; i++) {
@@ -208,5 +194,17 @@ public class Board {
             }
         }
         return manhattan;
+    }
+
+
+    public static void main(String[] args) {
+        int[][] tiles = new int[3][3];
+        tiles[0] = new int[]{1, 0, 3}; tiles[1] = new int[]{4, 2, 5}; tiles[2] = new int[]{7, 8, 6};
+        Board board = new Board(tiles);
+        System.out.println(board);
+
+        for (Board neighbor : board.neighbors()) {
+            System.out.println(neighbor);
+        }
     }
 }
