@@ -35,13 +35,13 @@ public class BoggleSolver {
 
     private void findAllWords(BoggleBoard board, int i, int j, CustomTrieSET.Node node, String word, boolean[][] visited, Set<String> words) {
         char letter = board.getLetter(i, j);
-        node = node.next[letter];
+        node = node.getNext(letter);
         if (node == null) {
             return;
         }
         word += letter;
         if (letter == 'Q') {
-            node = node.next['U'];
+            node = node.getNext('U');
             word += 'U';
             if (node == null) {
                 return;
@@ -100,11 +100,18 @@ public class BoggleSolver {
     }
 
     private static class CustomTrieSET {
-        private final static int R = 127;
+        private final static int R = 26;
 
         private static class Node {
             private Node[] next = new Node[R];
             private boolean isString;
+
+            private Node getNext(char c){
+                return next[c - 65];
+            }
+            private void setNext(char c, Node n){
+                next[c - 65] = n;
+            }
         }
 
         private Node root;
@@ -131,7 +138,7 @@ public class BoggleSolver {
                 return node;
             }
             char charAt = key.charAt(d);
-            node.next[charAt] = add(node.next[charAt], key, d + 1);
+            node.setNext(charAt, add(node.getNext(charAt), key, d + 1));
             return node;
         }
 
@@ -146,7 +153,7 @@ public class BoggleSolver {
             if (node == null) return null;
             if (d == key.length()) return node;
             char charAt = key.charAt(d);
-            return get(node.next[charAt], key, d+1);
+            return get(node.getNext(charAt), key, d+1);
         }
     }
 
