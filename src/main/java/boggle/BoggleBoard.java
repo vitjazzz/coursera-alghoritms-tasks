@@ -1,6 +1,6 @@
-/******************************************************************************
- *  Compilation:  javac BoggleBoard.java
- *  Execution:    java  BoggleBoard
+package boggle; /******************************************************************************
+ *  Compilation:  javac boggle.BoggleBoard.java
+ *  Execution:    java  boggle.BoggleBoard
  *  Dependencies: StdRandom.java In.java StdOut.java
  *
  *  A data type for Boggle boards.
@@ -192,7 +192,7 @@ public class BoggleBoard {
     }
 
     /**
-     * Unit tests the BoggleBoard data type.
+     * Unit tests the boggle.BoggleBoard data type.
      */
     public static void main(String[] args) {
 
